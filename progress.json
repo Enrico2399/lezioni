@@ -1,6 +1,6 @@
 {
  "v": 2,
- "updatedAt": 1793204876356,
+ "updatedAt": 1793205027836,
  "subjects": {
   "fisica": {
    "lesson": 37,
@@ -67,5 +67,12 @@
   "so": 0,
   "arch": 0,
   "si": 0
+ },
+ "vault": {
+  "v": 1,
+  "it": 600000,
+  "salt": "l+bKk3iAFyZV/OXvL7WzCA==",
+  "iv": "zjVfE9c7Mcrw0gxz",
+  "ct": "hjSdrwzBohXnmeEXd0GG5HSgksoAKyfwsr96XMMlJwcPlM/UtjXuuIL9acrqvnICpIjt2Jqn+lnF5/zdn/gHsJkRVPMoWmzozFjwsrsovZ7ZHi33XPQeFNP8ahPVNQ4sxniyO2RPJJBZOYnszg=="
  }
 }

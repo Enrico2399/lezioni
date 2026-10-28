@@ -85,6 +85,10 @@ select:focus,input:focus{outline:2px solid var(--accent);outline-offset:0;border
 .pct{width:44px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px}
 .row.complete .name{color:var(--ok)}
 .done{font-size:13px;padding:6px 8px}
+.unlock{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:14px}
+.unlock[hidden]{display:none}
+.unlock input{width:220px;max-width:100%}
+.unlock .msg{color:var(--err);font-size:13px}
 dialog{border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);padding:0;width:min(520px,calc(100vw - 32px))}
 dialog::backdrop{background:rgba(0,0,0,.45)}
 dialog form{padding:20px}
@@ -117,6 +121,12 @@ dialog legend{font-size:13px;font-weight:600;padding:0 6px}
 <nav class="tabs" role="tablist" id="tabs"></nav>
 
 <main>
+  <form class="unlock" id="unlockFrm" hidden>
+    <span>Inserisci la password per attivare il salvataggio online su questo dispositivo.</span>
+    <input type="password" id="unlockPw" placeholder="Password" autocomplete="current-password">
+    <button type="submit" class="primary" id="unlockBtn">Sblocca</button>
+    <span class="msg" id="unlockMsg"></span>
+  </form>
   <section class="cards">
     <article class="card">
       <h2 id="totTitle">Lezioni</h2>
@@ -167,6 +177,19 @@ dialog legend{font-size:13px;font-weight:600;padding:0 6px}
         <input name="token" type="password" autocomplete="off" placeholder="github_pat_…">
       </label>
       <p class="hint">Il token resta salvato solo in questo browser e non finisce mai nel repository. Senza token la pagina legge i progressi ma non li salva online.</p>
+    </fieldset>
+    <fieldset>
+      <legend>Password per gli altri dispositivi</legend>
+      <div class="grid2">
+        <label>Password<input name="vpw" type="password" autocomplete="new-password"></label>
+        <label>Ripeti password<input name="vpw2" type="password" autocomplete="new-password"></label>
+      </div>
+      <p class="hint">Il token viene cifrato con questa password e salvato insieme ai progressi. Su un dispositivo nuovo ti basta scrivere la password. Il file è pubblico: usa almeno 12 caratteri, meglio 3-4 parole (es. <i>gatto-treno-lampada-42</i>).</p>
+      <div class="actions" style="margin-top:10px">
+        <button type="button" id="btnVaultDel">Rimuovi password</button>
+        <button type="button" id="btnVaultSet">Imposta password</button>
+      </div>
+      <p class="hint" id="vaultMsg"></p>
     </fieldset>
     <div class="actions">
       <button type="button" id="btnCancel">Annulla</button>
@@ -390,7 +413,38 @@ function update() {
 
   updateGoal(S);
   updateCal(S);
+  $('#unlockFrm').hidden = !(data.vault && !cfg.token);
 }
+
+/* ---------- Token cifrato con password (AES-GCM + PBKDF2) ---------- */
+const u8b64 = u8 => btoa(String.fromCharCode(...u8));
+const b64u8 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function deriveKey(pw, salt, iterations) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function lockToken(token, pw) {
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), it = 600000;
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await deriveKey(pw, salt, it), new TextEncoder().encode(token));
+  return { v: 1, it, salt: u8b64(salt), iv: u8b64(iv), ct: u8b64(new Uint8Array(ct)) };
+}
+async function unlockToken(vault, pw) {
+  const key = await deriveKey(pw, b64u8(vault.salt), vault.it);
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64u8(vault.iv) }, key, b64u8(vault.ct));
+  return new TextDecoder().decode(pt);
+}
+$('#unlockFrm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msg = $('#unlockMsg'), btn = $('#unlockBtn');
+  msg.textContent = ''; btn.disabled = true; btn.textContent = 'Verifico…';
+  try {
+    cfg.token = await unlockToken(data.vault, $('#unlockPw').value);
+    saveJSON(CFG_KEY, cfg);
+    $('#unlockPw').value = '';
+    update(); pull();
+  } catch { msg.textContent = 'Password errata'; }
+  btn.disabled = false; btn.textContent = 'Sblocca';
+});
 
 function updateGoal(S) {
   const start = parseDate(data.goal.start), days = S.weeks * 7, end = addDays(start, days - 1);
@@ -578,6 +632,7 @@ const dlg = $('#dlg'), frm = $('#frm');
 let rebase = false;
 $('#btnSettings').addEventListener('click', () => {
   rebase = false;
+  $('#vaultMsg').textContent = data.vault ? 'Password già impostata (puoi cambiarla).' : '';
   $('#btnRebase').textContent = "Riparti da oggi (azzera lo storico dell'obiettivo)";
   Object.entries({ start: data.goal.start, parallel: data.goal.parallel,
     owner: cfg.owner || '', repo: cfg.repo || '', branch: cfg.branch, path: cfg.path, token: cfg.token || '' })
@@ -585,6 +640,23 @@ $('#btnSettings').addEventListener('click', () => {
   dlg.showModal();
 });
 $('#btnCancel').addEventListener('click', () => dlg.close());
+$('#btnVaultSet').addEventListener('click', async () => {
+  const f = frm.elements, m = $('#vaultMsg'), token = f.token.value.trim() || cfg.token;
+  if (!token) { m.textContent = 'Prima inserisci il token qui sopra.'; return; }
+  if (f.vpw.value.length < 12) { m.textContent = 'La password deve avere almeno 12 caratteri.'; return; }
+  if (f.vpw.value !== f.vpw2.value) { m.textContent = 'Le due password non coincidono.'; return; }
+  m.textContent = 'Cifro il token…';
+  data.vault = await lockToken(token, f.vpw.value);
+  cfg.token = token; saveJSON(CFG_KEY, cfg);
+  f.vpw.value = f.vpw2.value = '';
+  changed();
+  m.textContent = 'Password impostata: sugli altri dispositivi ti basta scriverla.';
+});
+$('#btnVaultDel').addEventListener('click', () => {
+  if (!data.vault) { $('#vaultMsg').textContent = 'Nessuna password impostata.'; return; }
+  delete data.vault; changed();
+  $('#vaultMsg').textContent = 'Password rimossa.';
+});
 $('#btnRebase').addEventListener('click', () => {
   frm.elements.start.value = todayStr();
   rebase = true;

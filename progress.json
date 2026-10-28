@@ -1,6 +1,6 @@
 {
  "v": 2,
- "updatedAt": 1793206467677,
+ "updatedAt": 1793206754385,
  "subjects": {
   "fisica": {
    "lesson": 38,
@@ -52,7 +52,9 @@
    "si": 0
   }
  },
- "checks": {},
+ "checks": {
+  "2026-10-28_p3": true
+ },
  "goal": {
   "start": "2026-10-28",
   "parallel": 2

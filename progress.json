@@ -1,0 +1,71 @@
+{
+ "v": 2,
+ "updatedAt": 1793204349925,
+ "subjects": {
+  "fisica": {
+   "lesson": 37,
+   "rem": 45
+  },
+  "prob": {
+   "lesson": 1,
+   "rem": 45
+  },
+  "reti": {
+   "lesson": 3,
+   "rem": 45
+  },
+  "elettro": {
+   "lesson": 1,
+   "rem": 45
+  },
+  "misure": {
+   "lesson": 1,
+   "rem": 45
+  },
+  "compl": {
+   "lesson": 1,
+   "rem": 45
+  },
+  "so": {
+   "lesson": 1,
+   "rem": 45
+  },
+  "arch": {
+   "lesson": 1,
+   "rem": 45
+  },
+  "si": {
+   "lesson": 1,
+   "rem": 45
+  }
+ },
+ "history": {
+  "2026-10-28": {
+   "fisica": 1620,
+   "prob": 0,
+   "reti": 90,
+   "elettro": 0,
+   "misure": 0,
+   "compl": 0,
+   "so": 0,
+   "arch": 0,
+   "si": 0
+  }
+ },
+ "checks": {},
+ "goal": {
+  "start": "2026-10-28",
+  "parallel": 2
+ },
+ "baseSubj": {
+  "fisica": 1620,
+  "prob": 0,
+  "reti": 90,
+  "elettro": 0,
+  "misure": 0,
+  "compl": 0,
+  "so": 0,
+  "arch": 0,
+  "si": 0
+ }
+}

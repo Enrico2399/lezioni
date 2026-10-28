@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avanzamento lezioni</title>
+<style>
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --text:#1b1f24; --muted:#5d6670; --border:#e2e5e9;
+  --accent:#2f6fde; --accent-soft:#e3ecfc; --ok:#1f8a4c; --ok-soft:#e1f3e8; --warn:#b45309; --warn-soft:#fdf0e1;
+  --track:#e8ebef; --err:#c0392b;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1216; --surface:#171b21; --text:#e6e9ed; --muted:#98a2ad; --border:#2a3038;
+    --accent:#6b9cf0; --accent-soft:#1e2b43; --ok:#4cc183; --ok-soft:#173326; --warn:#f0a24a; --warn-soft:#3a2a16;
+    --track:#242a33; --err:#ef6b5b;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;max-width:1100px;margin:0 auto;padding:24px 16px 8px}
+h1{font-size:22px;margin:0;letter-spacing:-.01em}
+.hdr-right{display:flex;gap:8px;align-items:center}
+.pill{font-size:12.5px;padding:4px 10px;border-radius:99px;background:var(--track);color:var(--muted);white-space:nowrap;max-width:60vw;overflow:hidden;text-overflow:ellipsis}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.err{background:var(--warn-soft);color:var(--err)}
+button{font:inherit;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;padding:6px 12px}
+button:hover{border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:default}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+nav.tabs{max-width:1100px;margin:0 auto;padding:8px 16px 0;display:flex;gap:4px;border-bottom:1px solid var(--border)}
+nav.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:10px 14px;font-weight:600;color:var(--muted)}
+nav.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav.tabs button small{font-weight:400;margin-left:6px;font-variant-numeric:tabular-nums}
+main{max-width:1100px;margin:0 auto;padding:16px 16px 48px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px}
+.card h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 10px}
+.big{font-size:30px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.sub{color:var(--muted);font-size:13.5px;font-variant-numeric:tabular-nums}
+.bar{position:relative;height:10px;background:var(--track);border-radius:99px;overflow:visible}
+.bar>i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .35s ease}
+.bar.lg{height:14px;margin:10px 0 8px}
+.bar.done>i{background:var(--ok)}
+.marker{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:2px;opacity:.65}
+.status{display:inline-block;font-size:13px;font-weight:600;padding:2px 8px;border-radius:6px;margin-top:4px}
+.status.ahead{background:var(--ok-soft);color:var(--ok)} .status.behind{background:var(--warn-soft);color:var(--warn)}
+.weeks{display:grid;grid-template-columns:repeat(var(--n,7),1fr);gap:6px;margin-top:14px;align-items:end;max-width:100%}
+.wk{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:0}
+.wk .col{width:100%;height:56px;background:var(--track);border-radius:6px;position:relative;overflow:hidden}
+.wk .col i{position:absolute;left:0;right:0;bottom:0;background:var(--accent);border-radius:6px 6px 0 0}
+.wk.met .col i{background:var(--ok)}
+.wk.cur{color:var(--text);font-weight:600}
+.wk.cur .col{outline:2px solid var(--accent);outline-offset:1px}
+.cal{margin-bottom:24px}
+.cw{border-top:1px solid var(--border);padding:12px 0}
+.cw:first-of-type{border-top:0}
+.cwh{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13.5px;margin-bottom:8px;font-variant-numeric:tabular-nums}
+.cwh .h{color:var(--muted)} .cwh .h.met{color:var(--ok);font-weight:600}
+.cw.cur .cwh b{color:var(--accent)}
+.slots{display:flex;flex-wrap:wrap;gap:6px}
+.slot{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:8px;padding:5px 9px;font-size:12.5px;cursor:pointer;user-select:none;background:var(--bg)}
+.slot input{width:auto;margin:0;accent-color:var(--ok)}
+.slot .dt{color:var(--muted);font-variant-numeric:tabular-nums}
+.slot.done{background:var(--ok-soft);border-color:transparent}
+.slot.missed{border-color:var(--warn);border-style:dashed}
+.slot.today{outline:2px solid var(--accent);outline-offset:0}
+.group{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:16px;overflow:hidden}
+.group h2{font-size:15px;margin:0;padding:14px 18px;border-bottom:1px solid var(--border)}
+.thead,.row{display:grid;grid-template-columns:minmax(0,2.3fr) 118px 128px minmax(0,1.6fr) 92px;gap:14px;align-items:center;padding:10px 18px}
+.thead{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-top:8px;padding-bottom:6px}
+.row{border-top:1px solid var(--border)}
+.name{font-weight:600;min-width:0}
+.name small{display:block;font-weight:400;color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums}
+.f{display:flex;flex-direction:column;gap:2px}
+.lbl{display:none;font-size:11.5px;color:var(--muted)}
+select,input{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 8px;width:100%;font-variant-numeric:tabular-nums}
+select:focus,input:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.minwrap{display:flex;align-items:center;gap:6px}
+.minwrap input{width:72px}
+.minwrap span{color:var(--muted);font-size:13px}
+.prog{display:flex;align-items:center;gap:10px}
+.prog .bar{flex:1}
+.pct{width:44px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;font-size:13.5px}
+.row.complete .name{color:var(--ok)}
+.done{font-size:13px;padding:6px 8px}
+dialog{border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);padding:0;width:min(520px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{padding:20px}
+dialog h3{margin:0 0 4px;font-size:17px}
+dialog fieldset{border:1px solid var(--border);border-radius:10px;margin:14px 0 0;padding:10px 14px 14px}
+dialog legend{font-size:13px;font-weight:600;padding:0 6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid2 label,.full{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted)}
+.full{margin-top:10px}
+.hint{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+.actions{display:flex;justify-content:space-between;gap:8px;margin-top:18px;flex-wrap:wrap}
+@media (max-width:760px){
+  .cards{grid-template-columns:1fr}
+  .thead{display:none}
+  .row{grid-template-columns:1fr 1fr;gap:10px 12px;padding:14px 16px}
+  .name,.prog,.done{grid-column:1/-1}
+  .lbl{display:block}
+  .minwrap input{width:100%}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Avanzamento lezioni</h1>
+  <div class="hdr-right">
+    <span id="sync" class="pill">Solo su questo browser</span>
+    <button id="btnSettings" type="button">Impostazioni</button>
+  </div>
+</header>
+<nav class="tabs" role="tablist" id="tabs"></nav>
+
+<main>
+  <section class="cards">
+    <article class="card">
+      <h2 id="totTitle">Lezioni</h2>
+      <div class="big" id="totPct">0%</div>
+      <div class="bar lg" id="totBar"><i></i></div>
+      <div class="sub" id="totLine1"></div>
+      <div class="sub" id="totLine2"></div>
+    </article>
+    <article class="card">
+      <h2 id="goalTitle">Obiettivo</h2>
+      <div class="big" id="goalPct">0%</div>
+      <div class="bar lg" id="goalBar"><i></i><span class="marker" id="goalMarker" title="Dove dovresti essere oggi"></span></div>
+      <div class="sub" id="goalLine1"></div>
+      <div class="sub" id="goalLine2"></div>
+      <span class="status" id="goalStatus"></span>
+      <div class="weeks" id="weeks"></div>
+    </article>
+  </section>
+  <section class="card cal">
+    <h2>Calendario di studio</h2>
+    <div class="sub" id="calSum"></div>
+    <div id="cal"></div>
+  </section>
+  <div id="subjects"></div>
+</main>
+
+<dialog id="dlg">
+  <form method="dialog" id="frm">
+    <h3>Impostazioni</h3>
+    <fieldset>
+      <legend>Obiettivo</legend>
+      <div class="grid2">
+        <label>Data di inizio<input name="start" type="date"></label>
+        <label>Lezioni in contemporanea<input name="parallel" type="number" min="1" max="4" step="1"></label>
+      </div>
+      <p class="hint">L'obiettivo di ogni tab si calcola da solo: ore di lezione mancanti alla data di inizio ÷ lezioni in contemporanea. Le settimane sono quelle che servono con le fasce del calendario.</p>
+      <button type="button" id="btnRebase" style="margin-top:10px">Riparti da oggi (azzera lo storico dell'obiettivo)</button>
+    </fieldset>
+    <fieldset>
+      <legend>Salvataggio online su GitHub</legend>
+      <div class="grid2">
+        <label>Utente / organizzazione<input name="owner" autocomplete="off"></label>
+        <label>Repository<input name="repo" autocomplete="off"></label>
+        <label>Branch dei dati<input name="branch" autocomplete="off"></label>
+        <label>File dei dati<input name="path" autocomplete="off"></label>
+      </div>
+      <label class="full">Token GitHub (fine-grained, permesso Contents: read and write)
+        <input name="token" type="password" autocomplete="off" placeholder="github_pat_…">
+      </label>
+      <p class="hint">Il token resta salvato solo in questo browser e non finisce mai nel repository. Senza token la pagina legge i progressi ma non li salva online.</p>
+    </fieldset>
+    <div class="actions">
+      <button type="button" id="btnCancel">Annulla</button>
+      <button type="submit" class="primary">Salva</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- Configurazione ---------- */
+const LESSON_MIN = 45;
+const GROUPS = [
+  { title: 'Esami in preparazione', items: [
+    ['fisica', 'Fisica', 50],
+    ['prob', 'Probabilità e Statistica', 24],
+    ['reti', 'Reti Neurali', 32],
+  ]},
+  { title: '2° anno', items: [
+    ['elettro', 'Elettrotecnica', 40],
+    ['misure', 'Misure Elettroniche ed Elettronica', 50],
+    ['compl', 'Complementi di Matematica', 29],
+  ]},
+  { title: '3° anno', items: [
+    ['so', 'Sistemi Operativi', 30],
+    ['arch', 'Architettura dei calcolatori e progettazione di sistemi digitali', 40],
+    ['si', 'Sistemi Intelligenti', 20],
+  ]},
+];
+// Tab: 'attuale' è la principale
+const TABS = [
+  { id: 'attuale', label: 'Attuale', ids: ['fisica', 'prob', 'reti'] },
+  { id: 'totale', label: 'Totale', ids: null }, // null = tutte le materie
+];
+// Lezione da cui si parte (lezione in corso, minuti mancanti)
+const INITIAL = { fisica: { lesson: 37, rem: 45 }, reti: { lesson: 3, rem: 45 } };
+// Fasce di studio settimanali (dow: 0=domenica … 6=sabato; min = minuti reali)
+const SLOTS = [
+  { id: 'p1', dow: 1, label: 'Pranzo', min: 30 },
+  { id: 'p2', dow: 2, label: 'Pranzo', min: 30 },
+  { id: 'p3', dow: 3, label: 'Pranzo', min: 30 },
+  { id: 'p5', dow: 5, label: 'Pranzo', min: 30 },
+  { id: 's3', dow: 3, label: 'Smart', min: 240 },
+  { id: 's4', dow: 4, label: 'Smart', min: 240 },
+  { id: 'sa', dow: 6, label: 'Sabato', min: 120 },
+  { id: 'do', dow: 0, label: 'Domenica', min: 300 },
+];
+const WEEK_PLAN_MIN = SLOTS.reduce((a, s) => a + s.min, 0);
+const DOW = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+
+const SUBJ = GROUPS.flatMap(g => g.items.map(([id, name, n]) => ({ id, name, n })));
+const DATA_KEY = 'lezioni.data.v1', CFG_KEY = 'lezioni.cfg.v1', TAB_KEY = 'lezioni.tab';
+
+/* ---------- Utilità ---------- */
+const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const todayStr = () => new Date().toLocaleDateString('sv-SE');
+const parseDate = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const fmtDate = d => d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const dStr = d => d.toLocaleDateString('sv-SE');
+const fmtHM = min => { min = Math.round(Math.abs(min)); const h = Math.floor(min / 60), m = min % 60; return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`; };
+const loadJSON = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+const saveJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const b64enc = s => btoa(unescape(encodeURIComponent(s)));
+const b64dec = s => decodeURIComponent(escape(atob(s.replace(/\s/g, ''))));
+
+const doneMin = (s, st) => clamp((st.lesson - 1) * LESSON_MIN + (LESSON_MIN - st.rem), 0, s.n * LESSON_MIN);
+const doneLessons = (s, st) => clamp(st.lesson - 1 + (st.rem === 0 ? 1 : 0), 0, s.n);
+const snapshot = d => Object.fromEntries(SUBJ.map(s => [s.id, doneMin(s, d.subjects[s.id])]));
+
+/* ---------- Dati ---------- */
+function defaultData() {
+  const subjects = {};
+  SUBJ.forEach(s => subjects[s.id] = { ...(INITIAL[s.id] || { lesson: 1, rem: LESSON_MIN }) });
+  const d = { v: 2, updatedAt: 0, subjects, history: {}, checks: {}, goal: { start: todayStr(), parallel: 2 } };
+  d.baseSubj = snapshot(d);
+  return d;
+}
+function normalize(raw) {
+  const def = defaultData();
+  raw = raw || {};
+  const d = Object.assign(def, raw);
+  d.subjects = Object.assign({}, def.subjects, raw.subjects || {});
+  SUBJ.forEach(s => {
+    const st = d.subjects[s.id] = { ...d.subjects[s.id] };
+    st.lesson = clamp(parseInt(st.lesson) || 1, 1, s.n);
+    st.rem = parseInt(st.rem);
+    st.rem = Number.isNaN(st.rem) ? LESSON_MIN : clamp(st.rem, 0, LESSON_MIN);
+  });
+  d.goal = { start: (raw.goal && raw.goal.start) || def.goal.start, parallel: (raw.goal && raw.goal.parallel) || 2 };
+  d.checks = raw.checks || {};
+  // storico: { 'YYYY-MM-DD': { idMateria: minutiVisti } } (scarta il vecchio formato numerico)
+  d.history = {};
+  for (const k in (raw.history || {})) if (raw.history[k] && typeof raw.history[k] === 'object') d.history[k] = raw.history[k];
+  d.baseSubj = Object.assign({}, def.baseSubj, raw.baseSubj || {});
+  delete d.baseline;
+  d.v = 2;
+  return d;
+}
+let data = normalize(loadJSON(DATA_KEY));
+
+/* ---------- Tab ---------- */
+let tab = (location.hash.slice(1) || loadJSON(TAB_KEY) || 'attuale');
+if (!TABS.some(t => t.id === tab)) tab = 'attuale';
+const tabDef = () => TABS.find(t => t.id === tab);
+const tabIds = (t = tabDef()) => t.ids || SUBJ.map(s => s.id);
+const tabSubj = (t = tabDef()) => SUBJ.filter(s => tabIds(t).includes(s.id));
+const tabGroups = () => tab === 'attuale'
+  ? [{ title: 'Esami in preparazione', items: tabSubj().map(s => [s.id, s.name, s.n]) }]
+  : GROUPS;
+
+function buildTabs() {
+  const nav = $('#tabs');
+  nav.innerHTML = '';
+  TABS.forEach(t => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'tab'); b.dataset.tab = t.id;
+    b.innerHTML = `<span></span><small></small>`;
+    b.querySelector('span').textContent = t.label;
+    b.addEventListener('click', () => { tab = t.id; saveJSON(TAB_KEY, tab); history.replaceState(null, '', '#' + tab); buildTable(); update(); });
+    nav.appendChild(b);
+  });
+}
+
+/* ---------- Tabella materie ---------- */
+function buildTable() {
+  const root = $('#subjects');
+  root.innerHTML = '';
+  tabGroups().forEach(g => {
+    const sec = document.createElement('section');
+    sec.className = 'group';
+    sec.innerHTML = `<h2></h2><div class="thead"><span>Materia</span><span>Lezione in corso</span><span>Min. mancanti</span><span>Avanzamento</span><span></span></div>`;
+    sec.querySelector('h2').textContent = g.title;
+    g.items.forEach(([id, name, n]) => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.dataset.id = id;
+      let opts = '';
+      for (let i = 1; i <= n; i++) opts += `<option value="${i}">${i} / ${n}</option>`;
+      row.innerHTML = `
+        <div class="name"><span class="nm"></span><small class="meta"></small></div>
+        <label class="f"><span class="lbl">Lezione in corso</span><select class="lesson">${opts}</select></label>
+        <label class="f"><span class="lbl">Minuti mancanti</span><span class="minwrap"><input class="rem" type="number" min="0" max="${LESSON_MIN}" step="1" inputmode="numeric"><span>min</span></span></label>
+        <div class="prog"><div class="bar"><i></i></div><span class="pct"></span></div>
+        <button type="button" class="done" title="Segna la lezione in corso come finita e passa alla successiva">Finita ✓</button>`;
+      row.querySelector('.nm').textContent = name;
+      const s = SUBJ.find(x => x.id === id);
+      const sel = row.querySelector('.lesson'), inp = row.querySelector('.rem');
+      sel.addEventListener('change', () => { data.subjects[id].lesson = +sel.value; changed(); });
+      inp.addEventListener('input', () => {
+        const v = parseInt(inp.value.replace('-', ''));
+        if (Number.isNaN(v)) return;
+        data.subjects[id].rem = clamp(v, 0, LESSON_MIN); changed();
+      });
+      inp.addEventListener('blur', () => { inp.value = data.subjects[id].rem; });
+      row.querySelector('.done').addEventListener('click', () => {
+        const st = data.subjects[id];
+        if (st.lesson < s.n) { st.lesson++; st.rem = LESSON_MIN; } else st.rem = 0;
+        changed();
+      });
+      sec.appendChild(row);
+    });
+    root.appendChild(sec);
+  });
+}
+
+/* ---------- Calcoli per tab ---------- */
+function stats(t = tabDef()) {
+  const subs = tabSubj(t), par = Math.max(1, +data.goal.parallel || 1);
+  const totalMin = subs.reduce((a, s) => a + s.n * LESSON_MIN, 0);
+  const totalLessons = subs.reduce((a, s) => a + s.n, 0);
+  const done = subs.reduce((a, s) => a + doneMin(s, data.subjects[s.id]), 0);
+  const lessonsDone = subs.reduce((a, s) => a + doneLessons(s, data.subjects[s.id]), 0);
+  const base = subs.reduce((a, s) => a + (data.baseSubj[s.id] || 0), 0);
+  const goalMin = Math.max(1, (totalMin - base) / par);           // tempo reale necessario
+  const weeks = Math.max(1, Math.ceil(goalMin / WEEK_PLAN_MIN));    // settimane di calendario
+  const realDone = Math.max(0, done - base) / par;
+  return { subs, par, totalMin, totalLessons, done, lessonsDone, base, goalMin, weeks, realDone };
+}
+function valueAt(dateS, subs) {
+  let best = null;
+  for (const k in data.history) if (k <= dateS && (best === null || k > best)) best = k;
+  const snap = best ? data.history[best] : {};
+  return subs.reduce((a, s) => a + (snap[s.id] ?? data.baseSubj[s.id] ?? 0), 0);
+}
+
+/* ---------- Aggiornamento grafico ---------- */
+function update() {
+  document.querySelectorAll('#tabs button').forEach(b => {
+    b.setAttribute('aria-selected', b.dataset.tab === tab);
+    const st = stats(TABS.find(t => t.id === b.dataset.tab));
+    b.querySelector('small').textContent = Math.floor(st.done / st.totalMin * 100) + '%';
+  });
+
+  tabSubj().forEach(s => {
+    const row = document.querySelector(`.row[data-id="${s.id}"]`);
+    if (!row) return;
+    const st = data.subjects[s.id];
+    const dm = doneMin(s, st), tot = s.n * LESSON_MIN, pct = dm / tot * 100;
+    const sel = row.querySelector('.lesson'), inp = row.querySelector('.rem');
+    sel.value = st.lesson;
+    if (document.activeElement !== inp) inp.value = st.rem;
+    row.querySelector('.bar>i').style.width = pct + '%';
+    row.querySelector('.bar').classList.toggle('done', pct >= 100);
+    row.querySelector('.pct').textContent = Math.floor(pct) + '%';
+    row.querySelector('.meta').textContent = `${doneLessons(s, st)}/${s.n} lezioni · ${pct >= 100 ? 'completata' : 'mancano ' + fmtHM(tot - dm)}`;
+    row.classList.toggle('complete', pct >= 100);
+    row.querySelector('.done').disabled = pct >= 100;
+  });
+
+  const S = stats(), tPct = S.done / S.totalMin * 100;
+  $('#totTitle').textContent = tab === 'attuale' ? 'Lezioni esami attuali' : 'Totale lezioni';
+  $('#totPct').textContent = tPct.toFixed(1) + '%';
+  $('#totBar>i').style.width = tPct + '%';
+  $('#totBar').classList.toggle('done', tPct >= 100);
+  $('#totLine1').textContent = `${S.lessonsDone} di ${S.totalLessons} lezioni · ${fmtHM(S.done)} di ${fmtHM(S.totalMin)}`;
+  $('#totLine2').textContent = `Mancano ${S.totalLessons - S.lessonsDone} lezioni (${fmtHM(S.totalMin - S.done)} di video, ${fmtHM((S.totalMin - S.done) / S.par)} in tempo reale)`;
+
+  updateGoal(S);
+  updateCal(S);
+}
+
+function updateGoal(S) {
+  const start = parseDate(data.goal.start), days = S.weeks * 7, end = addDays(start, days - 1);
+  const today = parseDate(todayStr());
+  const dayIdx = Math.round((today - start) / 864e5);
+  const pct = S.realDone / S.goalMin * 100;
+  const expected = S.goalMin * clamp((dayIdx + 1) / days, 0, 1);
+
+  $('#goalTitle').textContent = `Obiettivo ${fmtHM(S.goalMin)} in ${S.weeks} settiman${S.weeks > 1 ? 'e' : 'a'}`;
+  $('#goalPct').textContent = pct.toFixed(1) + '%';
+  $('#goalBar>i').style.width = clamp(pct, 0, 100) + '%';
+  $('#goalBar').classList.toggle('done', pct >= 100);
+  $('#goalMarker').style.left = `calc(${clamp(expected / S.goalMin * 100, 0, 100)}% - 1px)`;
+  $('#goalLine1').textContent = `${fmtHM(S.realDone)} di ${fmtHM(S.goalMin)} in tempo reale (${S.par} lezion${S.par > 1 ? 'i' : 'e'} alla volta) · ${fmtDate(start)} → ${fmtDate(end)}`;
+  const week = clamp(Math.floor(dayIdx / 7) + 1, 1, S.weeks);
+  const leftDays = Math.max(1, days - Math.max(dayIdx, 0));
+  $('#goalLine2').textContent = dayIdx < 0
+    ? `Inizia il ${fmtDate(start)} · servono ${fmtHM(S.goalMin / S.weeks)} a settimana`
+    : `Settimana ${week} di ${S.weeks} · da qui in avanti servono ${fmtHM(Math.max(0, S.goalMin - S.realDone) / leftDays)} al giorno`;
+  const st = $('#goalStatus');
+  if (dayIdx < 0 || pct >= 100) { st.textContent = pct >= 100 ? 'Obiettivo raggiunto' : ''; st.className = 'status' + (pct >= 100 ? ' ahead' : ''); }
+  else {
+    const diff = S.realDone - expected;
+    st.textContent = diff >= 0 ? `In anticipo di ${fmtHM(diff)}` : `In ritardo di ${fmtHM(diff)}`;
+    st.className = 'status ' + (diff >= 0 ? 'ahead' : 'behind');
+  }
+
+  const wk = $('#weeks'), target = S.goalMin / S.weeks;
+  wk.style.setProperty('--n', S.weeks);
+  wk.innerHTML = '';
+  for (let k = 0; k < S.weeks; k++) {
+    const ws = addDays(start, k * 7), we = addDays(ws, 6);
+    let v = 0;
+    if (ws <= today) v = Math.max(0, (valueAt(dStr(we), S.subs) - valueAt(dStr(addDays(ws, -1)), S.subs)) / S.par);
+    const el = document.createElement('div');
+    el.className = 'wk' + (k + 1 === week && dayIdx >= 0 && dayIdx < days ? ' cur' : '') + (v >= target ? ' met' : '');
+    el.title = `Settimana ${k + 1} (${fmtDate(ws)}–${fmtDate(we)}): ${fmtHM(v)} su ${fmtHM(target)}`;
+    el.innerHTML = `<div class="col"><i style="height:${clamp(v / target * 100, 0, 100)}%"></i></div><span>S${k + 1}</span><span>${(v / 60).toFixed(1)}h</span>`;
+    wk.appendChild(el);
+  }
+}
+
+function updateCal(S) {
+  const start = parseDate(data.goal.start), today = todayStr();
+  const dayIdx = Math.round((parseDate(today) - start) / 864e5);
+  let checkedTot = 0, html = '';
+  for (let k = 0; k < S.weeks; k++) {
+    const ws = addDays(start, k * 7), we = addDays(ws, 6);
+    let slotsHtml = '', checked = 0;
+    for (let d = 0; d < 7; d++) {
+      const date = addDays(ws, d), ds = dStr(date);
+      SLOTS.filter(s => s.dow === date.getDay()).forEach(s => {
+        const key = ds + '_' + s.id, on = !!data.checks[key];
+        if (on) checked += s.min;
+        const cls = on ? 'done' : (ds < today ? 'missed' : (ds === today ? 'today' : ''));
+        slotsHtml += `<label class="slot ${cls}"><input type="checkbox" data-k="${key}"${on ? ' checked' : ''}><span class="dt">${DOW[date.getDay()]} ${fmtDate(date)}</span><b>${s.label} · ${fmtHM(s.min)}</b></label>`;
+      });
+    }
+    checkedTot += checked;
+    const cur = dayIdx >= k * 7 && dayIdx < (k + 1) * 7;
+    html += `<div class="cw${cur ? ' cur' : ''}"><div class="cwh"><b>Settimana ${k + 1} · ${fmtDate(ws)}–${fmtDate(we)}</b><span class="h${checked >= WEEK_PLAN_MIN ? ' met' : ''}">${fmtHM(checked)} / ${fmtHM(WEEK_PLAN_MIN)}</span></div><div class="slots">${slotsHtml}</div></div>`;
+  }
+  $('#cal').innerHTML = html;
+  const plan = WEEK_PLAN_MIN * S.weeks;
+  $('#calSum').textContent = `Piano: ${fmtHM(WEEK_PLAN_MIN)} a settimana × ${S.weeks} = ${fmtHM(plan)} (obiettivo ${fmtHM(S.goalMin)}, margine ${fmtHM(plan - S.goalMin)}) · ore spuntate: ${fmtHM(checkedTot)}`;
+}
+$('#cal').addEventListener('change', e => {
+  const k = e.target.dataset && e.target.dataset.k;
+  if (!k) return;
+  if (e.target.checked) data.checks[k] = true; else delete data.checks[k];
+  changed();
+});
+
+/* ---------- Salvataggio ---------- */
+let dirty = false;
+function changed() {
+  data.updatedAt = Date.now();
+  data.history[todayStr()] = snapshot(data);
+  saveJSON(DATA_KEY, data);
+  update();
+  dirty = true;
+  schedulePush();
+}
+
+/* ---------- Sincronizzazione con GitHub (file JSON nel repository) ---------- */
+let cfg = Object.assign({ branch: 'progress-data', path: 'progress.json' }, loadJSON(CFG_KEY) || {});
+if (!cfg.owner && location.hostname.endsWith('.github.io')) {
+  cfg.owner = location.hostname.split('.')[0];
+  const seg = location.pathname.split('/').filter(Boolean)[0];
+  cfg.repo = seg && !/\.html?$/.test(seg) ? seg : location.hostname;
+}
+let remoteSha = null, pushTimer = null, pushing = false, pushAgain = false;
+
+function setSync(state, msg) {
+  const p = $('#sync');
+  const t = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const map = {
+    local: ['Solo su questo browser', ''],
+    readonly: ['Sola lettura online (manca il token)', ''],
+    loading: ['Sincronizzazione…', ''],
+    saving: ['Salvataggio…', ''],
+    ok: [`Sincronizzato ✓ ${t}`, 'ok'],
+    error: [`Errore sync: ${msg || ''}`, 'err'],
+  };
+  const [txt, cls] = map[state];
+  p.textContent = txt; p.className = 'pill ' + cls; p.title = txt;
+}
+const hasRepo = () => cfg.owner && cfg.repo;
+const filePath = () => cfg.path.split('/').map(encodeURIComponent).join('/');
+const repoUrl = () => `/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}`;
+function api(p, opt = {}) {
+  const headers = { Accept: 'application/vnd.github+json', ...(opt.headers || {}) };
+  if (cfg.token) headers.Authorization = 'Bearer ' + cfg.token;
+  return fetch('https://api.github.com' + p, { cache: 'no-store', ...opt, headers });
+}
+async function pull() {
+  if (!hasRepo()) return setSync('local');
+  if (dirty) return; // non sovrascrivere modifiche non ancora salvate
+  setSync('loading');
+  try {
+    const r = await api(`${repoUrl()}/contents/${filePath()}?ref=${encodeURIComponent(cfg.branch)}`);
+    if (r.status === 404) {
+      remoteSha = null;
+      if (cfg.token && data.updatedAt) { dirty = true; return push(); }
+      return setSync(cfg.token ? 'ok' : 'readonly');
+    }
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    remoteSha = j.sha;
+    const remote = JSON.parse(b64dec(j.content));
+    if ((remote.updatedAt || 0) > (data.updatedAt || 0)) {
+      data = normalize(remote); saveJSON(DATA_KEY, data); update();
+    } else if ((remote.updatedAt || 0) < (data.updatedAt || 0) && cfg.token) {
+      dirty = true; return push();
+    }
+    setSync(cfg.token ? 'ok' : 'readonly');
+  } catch (e) { setSync('error', e.message); }
+}
+function schedulePush() {
+  if (!hasRepo() || !cfg.token) { setSync(hasRepo() ? 'readonly' : 'local'); return; }
+  clearTimeout(pushTimer);
+  setSync('saving');
+  pushTimer = setTimeout(push, 1500);
+}
+async function push() {
+  if (!hasRepo() || !cfg.token) return;
+  if (pushing) { pushAgain = true; return; }
+  pushing = true; setSync('saving');
+  try { await putFile(0); dirty = false; setSync('ok'); }
+  catch (e) { setSync('error', e.message); }
+  pushing = false;
+  if (pushAgain) { pushAgain = false; push(); }
+}
+async function putFile(attempt) {
+  const body = { message: 'Aggiorna avanzamento lezioni', content: b64enc(JSON.stringify(data, null, 1)), branch: cfg.branch };
+  if (remoteSha) body.sha = remoteSha;
+  const r = await api(`${repoUrl()}/contents/${filePath()}`, { method: 'PUT', body: JSON.stringify(body) });
+  if (r.ok) { remoteSha = (await r.json()).content.sha; return; }
+  const txt = await r.text();
+  let msg = ''; try { msg = JSON.parse(txt).message || ''; } catch {}
+  if (attempt < 2 && /branch/i.test(msg) && (r.status === 404 || r.status === 422)) {
+    await createBranch(); return putFile(attempt + 1);
+  }
+  if (attempt < 2 && (r.status === 409 || r.status === 422)) {
+    const g = await api(`${repoUrl()}/contents/${filePath()}?ref=${encodeURIComponent(cfg.branch)}`);
+    remoteSha = g.ok ? (await g.json()).sha : null;
+    return putFile(attempt + 1);
+  }
+  throw new Error(`${r.status} ${msg}`.trim());
+}
+async function createBranch() {
+  const repo = await api(repoUrl());
+  if (!repo.ok) throw new Error('repository ' + repo.status);
+  const def = (await repo.json()).default_branch;
+  const ref = await api(`${repoUrl()}/git/ref/heads/${encodeURIComponent(def)}`);
+  if (!ref.ok) throw new Error('branch ' + ref.status);
+  const sha = (await ref.json()).object.sha;
+  const c = await api(`${repoUrl()}/git/refs`, { method: 'POST', body: JSON.stringify({ ref: 'refs/heads/' + cfg.branch, sha }) });
+  if (!c.ok && c.status !== 422) throw new Error('crea branch ' + c.status);
+  remoteSha = null;
+}
+
+/* ---------- Impostazioni ---------- */
+const dlg = $('#dlg'), frm = $('#frm');
+let rebase = false;
+$('#btnSettings').addEventListener('click', () => {
+  rebase = false;
+  $('#btnRebase').textContent = "Riparti da oggi (azzera lo storico dell'obiettivo)";
+  Object.entries({ start: data.goal.start, parallel: data.goal.parallel,
+    owner: cfg.owner || '', repo: cfg.repo || '', branch: cfg.branch, path: cfg.path, token: cfg.token || '' })
+    .forEach(([k, v]) => frm.elements[k].value = v);
+  dlg.showModal();
+});
+$('#btnCancel').addEventListener('click', () => dlg.close());
+$('#btnRebase').addEventListener('click', () => {
+  frm.elements.start.value = todayStr();
+  rebase = true;
+  $('#btnRebase').textContent = 'Ok: premi Salva per ripartire da oggi';
+});
+frm.addEventListener('submit', () => {
+  const f = frm.elements;
+  data.goal = { start: f.start.value || todayStr(), parallel: clamp(parseInt(f.parallel.value) || 1, 1, 4) };
+  if (rebase) { data.baseSubj = snapshot(data); data.history = {}; }
+  cfg = { owner: f.owner.value.trim(), repo: f.repo.value.trim(), branch: f.branch.value.trim() || 'progress-data',
+    path: f.path.value.trim() || 'progress.json', token: f.token.value.trim() };
+  saveJSON(CFG_KEY, cfg);
+  remoteSha = null;
+  changed();
+});
+
+/* ---------- Avvio ---------- */
+buildTabs();
+buildTable();
+update();
+pull();
+window.addEventListener('hashchange', () => {
+  const t = location.hash.slice(1);
+  if (TABS.some(x => x.id === t) && t !== tab) { tab = t; saveJSON(TAB_KEY, tab); buildTable(); update(); }
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pull(); });
+setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 120000);
+})();
+</script>
+</body>
+</html>

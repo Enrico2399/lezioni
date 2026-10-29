@@ -120,6 +120,7 @@ dialog legend{font-size:13px;font-weight:600;padding:0 6px}
   <h1>Avanzamento lezioni</h1>
   <div class="hdr-right">
     <span id="sync" class="pill">Solo su questo browser</span>
+    <button id="btnInstall" type="button" class="primary" hidden>Installa app</button>
     <button id="btnSettings" type="button">Impostazioni</button>
   </div>
 </header>
@@ -692,6 +693,16 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 window.addEventListener('online', () => { if (dirty) push(); else pull(); });
 // Web app installabile (Android: "Installa app")
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+// Pulsante "Installa app": compare solo quando Chrome permette l'installazione
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('#btnInstall').hidden = false; });
+$('#btnInstall').addEventListener('click', async () => {
+  if (!installEvt) return;
+  installEvt.prompt();
+  await installEvt.userChoice;
+  installEvt = null; $('#btnInstall').hidden = true;
+});
+window.addEventListener('appinstalled', () => { $('#btnInstall').hidden = true; });
 setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 120000);
 })();
 </script>

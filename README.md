@@ -30,6 +30,26 @@ I progressi si salvano da soli nel file `progress.json` sul branch `progress-dat
 Il token resta salvato solo nel browser di quel dispositivo e non finisce mai nel repository. Senza token la pagina mostra i progressi ma non li salva online.
 I dati vanno su un branch separato (`progress-data`), quindi i salvataggi non fanno ripubblicare il sito.
 
+## App su Android
+
+Carica nel repository tutti i file: `index.html`, `manifest.webmanifest`, `sw.js` e le 4 icone `.png`.
+
+1. Apri il sito con **Chrome** sul telefono.
+2. Tocca il menu **⋮** e scegli **Installa app** (oppure **Aggiungi a schermata Home**).
+3. L'icona compare tra le app: si apre a schermo intero, senza barra degli indirizzi, sulla tab **Attuale**.
+
+L'app si apre anche senza connessione. Le modifiche fatte offline restano sul telefono e vengono salvate online appena torna la rete.
+Se nel Chrome del telefono avevi già sbloccato il salvataggio con la password, l'app è già configurata: usa gli stessi dati.
+
+## Altri dispositivi con una password
+
+1. Sul dispositivo dove hai già inserito il token apri **Impostazioni → Password per gli altri dispositivi**.
+2. Scegli una password lunga (almeno 12 caratteri, meglio 3-4 parole) e clicca **Imposta password**.
+3. Su un browser nuovo compare un riquadro blu: scrivi la password, clicca **Sblocca** e quel browser resta configurato.
+
+Il token viene cifrato con la password (AES-GCM, chiave derivata con PBKDF2 a 600.000 iterazioni) e salvato in `progress.json`. In chiaro non finisce mai online.
+Se rigeneri il token, imposta di nuovo la password dal dispositivo che ha il token nuovo.
+
 ## Personalizzazione
 
 Tutto si trova in cima allo `<script>` dentro `index.html`:

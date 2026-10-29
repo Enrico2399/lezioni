@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Avanzamento lezioni</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2f6fde">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
 <style>
 :root{
   --bg:#f5f6f8; --surface:#ffffff; --text:#1b1f24; --muted:#5d6670; --border:#e2e5e9;
@@ -682,7 +687,11 @@ window.addEventListener('hashchange', () => {
   const t = location.hash.slice(1);
   if (TABS.some(x => x.id === t) && t !== tab) { tab = t; saveJSON(TAB_KEY, tab); buildTable(); update(); }
 });
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pull(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { if (dirty) push(); else pull(); } });
+// Tornato online: salva le modifiche fatte offline
+window.addEventListener('online', () => { if (dirty) push(); else pull(); });
+// Web app installabile (Android: "Installa app")
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 120000);
 })();
 </script>

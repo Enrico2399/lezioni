@@ -1,10 +1,10 @@
 {
  "v": 2,
- "updatedAt": 1793350611593,
+ "updatedAt": 1793350615898,
  "subjects": {
   "fisica": {
    "lesson": 50,
-   "rem": 23
+   "rem": 0
   },
   "prob": {
    "lesson": 1,
@@ -63,7 +63,7 @@
    "si": 0
   },
   "2026-10-30": {
-   "fisica": 2227,
+   "fisica": 2250,
    "prob": 39,
    "reti": 90,
    "elettro": 0,

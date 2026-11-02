@@ -1,14 +1,14 @@
 {
  "v": 2,
- "updatedAt": 1793618285130,
+ "updatedAt": 1793605160897,
  "subjects": {
   "fisica": {
    "lesson": 50,
    "rem": 0
   },
   "prob": {
-   "lesson": 5,
-   "rem": 25
+   "lesson": 3,
+   "rem": 30
   },
   "reti": {
    "lesson": 3,
@@ -75,7 +75,7 @@
   },
   "2026-11-02": {
    "fisica": 2250,
-   "prob": 200,
+   "prob": 105,
    "reti": 90,
    "elettro": 0,
    "misure": 0,
@@ -89,8 +89,7 @@
   "2026-10-29_s4": true,
   "2026-10-28_s3": true,
   "2026-10-28_p3": true,
-  "2026-10-30_p5": true,
-  "2026-11-02_p1": true
+  "2026-10-30_p5": true
  },
  "goal": {
   "start": "2026-10-28",
